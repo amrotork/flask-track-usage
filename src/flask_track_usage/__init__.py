@@ -155,6 +155,36 @@ class TrackUsage(object):
         else:
             current_time = now
 
+        ga_cookie = ctx.request.cookies.get("_ga")
+        gid_cookie = ctx.request.cookies.get("_gid")
+
+        if not ga_cookie is None:
+            client_id = ".".join(ga_cookie.split(".")[-2:])
+        else:
+            client_id = ""
+        
+        if not gid_cookie is None:
+            gid = ".".join(gid_cookie.split(".")[-2:])
+        else:
+            gid = ""
+        
+        args = ctx.request.args
+
+        if "utm_source" in args:
+            source = args["utm_source"]
+        else:
+            source = "organic"
+
+        if "utm_medium" is args:
+            medium = args["utm_medium"]
+        else:
+            medium = "organic"
+
+        if "utm_campaign" in args:
+            campaign = args["utm_campaign"]
+        else:
+            campaign = "Unknown"
+
         data = {
             'url': ctx.request.url,
             'user_agent': ctx.request.user_agent,
@@ -180,7 +210,12 @@ class TrackUsage(object):
                 [(k, ctx.request.args[k]) for k in ctx.request.args]
             ),
             'username': None,
-            'track_var': g.track_var
+            'track_var': g.track_var,
+            'cid': client_id,
+            'gid': gid,
+            'source': source,
+            'medium': medium,
+            'campaign': campaign
         }
         if ctx.request.authorization:
             data['username'] = str(ctx.request.authorization.username)
